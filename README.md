@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# Music Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Website quản trị dữ liệu nhạc cho ứng dụng Android — React + TypeScript + Material UI + Firebase Firestore + Cloudinary.
 
-Currently, two official plugins are available:
+## Công nghệ
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Frontend:** React 19, Vite, TypeScript, MUI, React Query, React Router, React Hook Form, Zod, Axios
+- **Database:** Firebase Firestore
+- **Storage:** Cloudinary (unsigned upload preset)
 
-## React Compiler
+## Cài đặt
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env
+# Điền Firebase và Cloudinary credentials vào .env
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Cấu hình Firebase
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Project: **music-c223e** — credentials đã có trong `.env` (file này không commit lên git).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Mở [Firebase Console → music-c223e](https://console.firebase.google.com/project/music-c223e)
+2. **Build → Firestore Database → Create database** (chọn region gần bạn)
+3. **Firestore → Rules** — paste nội dung `firestore.rules`, hoặc deploy:
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase use music-c223e
+firebase deploy --only firestore:rules
 ```
+
+4. Tạo composite index khi app/console báo lỗi (thường: `songs` + `title`, `songs` + `views` DESC)
+
+## Cấu hình Cloudinary
+
+1. Tạo **unsigned upload preset** (Settings → Upload → Upload presets)
+2. Điền `VITE_CLOUDINARY_CLOUD_NAME` và `VITE_CLOUDINARY_UPLOAD_PRESET` vào `.env`
+
+## Scripts
+
+| Lệnh | Mô tả |
+|------|--------|
+| `npm run dev` | Chạy dev server |
+| `npm run build` | Build production |
+| `npm run preview` | Preview build |
+| `npm run lint` | ESLint |
+
+## Cấu trúc thư mục
+
+```
+src/
+├── app/           # Theme, providers, router
+├── config/        # Firebase init
+├── types/         # TypeScript interfaces
+├── services/      # Firestore & Cloudinary API
+├── hooks/         # React Query hooks
+├── components/    # UI components
+├── pages/         # Route pages
+└── utils/         # Format & validation
+```
+
+## Lưu ý bảo mật
+
+- Không có đăng nhập — chỉ dùng nội bộ/dev
+- `firestore.rules` hiện cho phép read/write toàn bộ — **không deploy production** với rules này
