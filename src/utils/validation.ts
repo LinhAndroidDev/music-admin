@@ -16,7 +16,11 @@ export const songSchema = z.object({
   categoryId: z.string().min(1, 'Vui lòng chọn thể loại'),
   thumbnailUrl: z.string().url('Vui lòng upload ảnh bìa'),
   audioUrl: z.string().url('Vui lòng upload file mp3'),
-  lyricUrl: z.string().url('Vui lòng upload file lyric'),
+  lyricUrl: z
+    .string()
+    .url('File lyric không hợp lệ')
+    .or(z.literal(''))
+    .optional(),
   duration: z.number().min(1, 'Không đọc được thời lượng bài hát'),
 })
 

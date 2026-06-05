@@ -171,7 +171,7 @@ export function SongForm({ song, errorMessage, onSubmit }: SongFormProps) {
           control={control}
           render={({ field }) => (
             <CloudinaryUpload
-              label="File lyric (.lrc)"
+              label="File lyric (.lrc) — không bắt buộc"
               accept=".lrc,text/plain"
               resourceType="raw"
               previewType="text"

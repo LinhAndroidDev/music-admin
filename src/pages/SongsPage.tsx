@@ -106,7 +106,7 @@ export function SongsPage() {
       singerName: singerNames[0] ?? '',
       thumbnailUrl: values.thumbnailUrl,
       audioUrl: values.audioUrl,
-      lyricUrl: values.lyricUrl,
+      lyricUrl: values.lyricUrl ?? '',
       duration: values.duration,
       categoryId: values.categoryId,
       categoryName: category?.name ?? '',
