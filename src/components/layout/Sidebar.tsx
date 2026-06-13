@@ -1,5 +1,6 @@
 import CategoryIcon from '@mui/icons-material/Category'
 import DashboardIcon from '@mui/icons-material/Dashboard'
+import ImageIcon from '@mui/icons-material/Image'
 import LibraryMusicIcon from '@mui/icons-material/LibraryMusic'
 import MicIcon from '@mui/icons-material/Mic'
 import MusicNoteIcon from '@mui/icons-material/MusicNote'
@@ -24,6 +25,7 @@ const menuItems = [
   { label: 'Songs', path: '/songs', icon: <LibraryMusicIcon /> },
   { label: 'Singers', path: '/singers', icon: <MicIcon /> },
   { label: 'Categories', path: '/categories', icon: <CategoryIcon /> },
+  { label: 'Banners', path: '/advertisements', icon: <ImageIcon /> },
 ]
 
 interface SidebarProps {

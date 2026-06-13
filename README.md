@@ -1,6 +1,6 @@
 # Music Admin
 
-Website quản trị dữ liệu nhạc cho ứng dụng Android nghe nhạc — quản lý **bài hát**, **ca sĩ** và **thể loại**. Dữ liệu lưu trên **Firebase Firestore**, file media (ảnh, MP3, lyric) lưu trên **Cloudinary**.
+Website quản trị dữ liệu nhạc cho ứng dụng Android nghe nhạc — quản lý **bài hát**, **ca sĩ**, **thể loại** và **banner**. Dữ liệu lưu trên **Firebase Firestore**, file media (ảnh, MP3, lyric) lưu trên **Cloudinary**.
 
 ## Mục lục
 
@@ -14,6 +14,7 @@ Website quản trị dữ liệu nhạc cho ứng dụng Android nghe nhạc —
 - [Cấu trúc thư mục](#cấu-trúc-thư-mục)
 - [Mô hình dữ liệu](#mô-hình-dữ-liệu)
 - [Kiến trúc](#kiến-trúc)
+- [Tích hợp Android](#tích-hợp-android)
 - [Lưu ý bảo mật](#lưu-ý-bảo-mật)
 
 ## Tính năng
@@ -24,7 +25,8 @@ Website quản trị dữ liệu nhạc cho ứng dụng Android nghe nhạc —
   - **Lyric không bắt buộc** — bài hát chưa có lyric vẫn lưu được.
 - **Quản lý ca sĩ** — thêm / sửa / xóa kèm ảnh đại diện và mô tả. Không cho xóa ca sĩ đang được dùng trong bài hát.
 - **Quản lý thể loại** — thêm / sửa / xóa.
-- **Upload media linh hoạt** — mỗi trường file (ảnh bìa, MP3, lyric, avatar) hỗ trợ 2 chế độ:
+- **Quản lý banner** — thêm / sửa / xóa banner quảng cáo cho app (ảnh, tiêu đề, mô tả).
+- **Upload media linh hoạt** — mỗi trường file (ảnh bìa, MP3, lyric, avatar, banner) hỗ trợ 2 chế độ:
   - **Tải lên** file từ thiết bị (đẩy thẳng lên Cloudinary).
   - **Nhập URL** có sẵn. Với file MP3, hệ thống tự đọc thời lượng từ URL/file.
 
@@ -89,6 +91,7 @@ firebase deploy --only firestore:rules
    - `songs`: `title` (ASC) — phục vụ tìm kiếm theo tên
    - `songs`: `views` (DESC) — phục vụ Top bài hát
    - `songs`: `createdAt` (DESC) — phục vụ phân trang mặc định
+   - `advertisements`: `createdAt` (DESC) — phục vụ sắp xếp banner
 
 ## Cấu hình Cloudinary
 
@@ -112,14 +115,14 @@ firebase deploy --only firestore:rules
 src/
 ├── app/                # Khởi tạo app: App, providers (React Query), router, theme
 ├── config/             # Khởi tạo Firebase & Firestore
-├── types/              # TypeScript interfaces (song, singer, category)
+├── types/              # TypeScript interfaces (song, singer, category, advertisement)
 ├── services/           # Tầng truy cập dữ liệu: Firestore CRUD & Cloudinary upload
-├── hooks/              # React Query hooks (useSongs, useSingers, useCategories, useDashboard)
+├── hooks/              # React Query hooks (useSongs, useSingers, useCategories, useAdvertisements, useDashboard)
 ├── components/
 │   ├── common/         # Component dùng chung (DataTable, FormDialog, CloudinaryUpload, ...)
-│   ├── forms/          # Form bài hát / ca sĩ / thể loại
+│   ├── forms/          # Form bài hát / ca sĩ / thể loại / banner
 │   └── layout/         # AppLayout, Header, Sidebar
-├── pages/              # Trang theo route (Dashboard, Songs, Singers, Categories)
+├── pages/              # Trang theo route (Dashboard, Songs, Singers, Categories, Advertisements)
 └── utils/              # Tiện ích format & schema validation (Zod)
 ```
 
@@ -131,6 +134,7 @@ src/
 | `/songs` | Quản lý bài hát |
 | `/singers` | Quản lý ca sĩ |
 | `/categories` | Quản lý thể loại |
+| `/advertisements` | Quản lý banner |
 | `*` | Redirect về `/` |
 
 ## Mô hình dữ liệu
@@ -169,6 +173,15 @@ src/
 |--------|------|
 | `name` | `string` |
 
+### Collection `advertisements`
+
+| Trường | Kiểu | Ghi chú |
+|--------|------|---------|
+| `image` | `string` | URL ảnh banner |
+| `update` | `string` | Tiêu đề ngắn |
+| `detail` | `string` | Mô tả chi tiết |
+| `createdAt` | `Timestamp` | Server timestamp (sắp xếp) |
+
 ## Kiến trúc
 
 Luồng dữ liệu theo các tầng rõ ràng:
@@ -181,6 +194,12 @@ Pages  →  Hooks (React Query)  →  Services  →  Firestore / Cloudinary
 - **Hooks** (`src/hooks`) bọc service bằng React Query (`useQuery` / `useMutation`) và lo việc cache invalidation.
 - **Pages** chỉ ghép UI và gọi hooks; **Forms** validate bằng Zod thông qua React Hook Form.
 - Danh sách dùng **phân trang cursor** (`startAfter` + `limit`) thay vì offset để tối ưu Firestore.
+
+## Tích hợp Android
+
+App Android (Kotlin) đọc dữ liệu trực tiếp từ cùng project Firestore. Xem hướng dẫn chi tiết kèm data class Kotlin, cách phân trang, tìm kiếm, lắng nghe realtime và tăng lượt xem tại:
+
+➡️ [`docs/ANDROID_INTEGRATION.md`](docs/ANDROID_INTEGRATION.md)
 
 ## Lưu ý bảo mật
 

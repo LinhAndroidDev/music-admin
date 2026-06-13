@@ -1,4 +1,5 @@
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import EditNoteIcon from '@mui/icons-material/EditNote'
 import LinkIcon from '@mui/icons-material/Link'
 import {
   Box,
@@ -14,6 +15,7 @@ import {
 import { useRef, useState } from 'react'
 import {
   getAudioDuration,
+  uploadTextToCloudinary,
   uploadToCloudinary,
   type CloudinaryResourceType,
 } from '../../services/cloudinary.service'
@@ -26,9 +28,11 @@ interface CloudinaryUploadProps {
   onChange: (url: string, meta?: { duration?: number }) => void
   onError?: (message: string) => void
   previewType?: 'image' | 'text' | 'audio'
+  /** Bật chế độ nhập nội dung text, tự convert sang file .txt và upload Cloudinary */
+  allowTextInput?: boolean
 }
 
-type InputMode = 'upload' | 'url'
+type InputMode = 'upload' | 'url' | 'text'
 
 export function CloudinaryUpload({
   label,
@@ -38,11 +42,13 @@ export function CloudinaryUpload({
   onChange,
   onError,
   previewType = 'text',
+  allowTextInput = false,
 }: CloudinaryUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [mode, setMode] = useState<InputMode>('upload')
   const [urlInput, setUrlInput] = useState('')
+  const [textInput, setTextInput] = useState('')
 
   const handleFile = async (file: File | null) => {
     if (!file) return
@@ -98,6 +104,23 @@ export function CloudinaryUpload({
     onChange(url)
   }
 
+  const handleApplyText = async () => {
+    const content = textInput.trim()
+    if (!content) return
+
+    setUploading(true)
+    try {
+      const filename = `lyric-${Date.now()}.txt`
+      const result = await uploadTextToCloudinary(content, filename, resourceType)
+      onChange(result.url)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Upload thất bại'
+      onError?.(message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <Box>
       <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
@@ -111,7 +134,7 @@ export function CloudinaryUpload({
         onChange={(_, next: InputMode | null) => {
           if (next) setMode(next)
         }}
-        sx={{ mb: 1 }}
+        sx={{ mb: 1, flexWrap: 'wrap' }}
       >
         <ToggleButton value="upload">
           <CloudUploadIcon fontSize="small" sx={{ mr: 0.5 }} />
@@ -121,9 +144,15 @@ export function CloudinaryUpload({
           <LinkIcon fontSize="small" sx={{ mr: 0.5 }} />
           Nhập URL
         </ToggleButton>
+        {allowTextInput && (
+          <ToggleButton value="text">
+            <EditNoteIcon fontSize="small" sx={{ mr: 0.5 }} />
+            Nhập nội dung
+          </ToggleButton>
+        )}
       </ToggleButtonGroup>
 
-      {mode === 'upload' ? (
+      {mode === 'upload' && (
         <>
           <input
             ref={inputRef}
@@ -142,7 +171,9 @@ export function CloudinaryUpload({
             {value ? 'Thay đổi file' : 'Chọn file upload'}
           </Button>
         </>
-      ) : (
+      )}
+
+      {mode === 'url' && (
         <Stack direction="row" spacing={1} alignItems="flex-start">
           <TextField
             fullWidth
@@ -162,6 +193,27 @@ export function CloudinaryUpload({
             onClick={handleApplyUrl}
             disabled={uploading || !urlInput.trim()}
             sx={{ whiteSpace: 'nowrap' }}
+          >
+            {uploading ? <CircularProgress size={18} /> : 'Áp dụng'}
+          </Button>
+        </Stack>
+      )}
+
+      {mode === 'text' && allowTextInput && (
+        <Stack spacing={1}>
+          <TextField
+            fullWidth
+            multiline
+            minRows={6}
+            placeholder="Dán hoặc nhập nội dung lyric..."
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+          />
+          <Button
+            variant="outlined"
+            onClick={handleApplyText}
+            disabled={uploading || !textInput.trim()}
+            sx={{ alignSelf: 'flex-start' }}
           >
             {uploading ? <CircularProgress size={18} /> : 'Áp dụng'}
           </Button>

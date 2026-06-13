@@ -24,6 +24,13 @@ export const songSchema = z.object({
   duration: z.number().min(1, 'Không đọc được thời lượng bài hát'),
 })
 
+export const advertisementSchema = z.object({
+  image: z.string().url('Vui lòng upload ảnh banner hoặc nhập URL hợp lệ'),
+  update: z.string().min(1, 'Tiêu đề là bắt buộc').max(200),
+  detail: z.string().min(1, 'Mô tả là bắt buộc').max(500),
+})
+
 export type CategoryFormValues = z.infer<typeof categorySchema>
 export type SingerFormValues = z.infer<typeof singerSchema>
 export type SongFormValues = z.infer<typeof songSchema>
+export type AdvertisementFormValues = z.infer<typeof advertisementSchema>

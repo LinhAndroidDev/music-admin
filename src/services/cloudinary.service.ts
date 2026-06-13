@@ -7,6 +7,16 @@ export interface CloudinaryUploadResult {
   duration?: number
 }
 
+export async function uploadTextToCloudinary(
+  content: string,
+  filename = 'lyric.txt',
+  resourceType: CloudinaryResourceType = 'raw',
+): Promise<CloudinaryUploadResult> {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+  const file = new File([blob], filename, { type: 'text/plain' })
+  return uploadToCloudinary(file, resourceType)
+}
+
 export async function uploadToCloudinary(
   file: File,
   resourceType: CloudinaryResourceType = 'auto',
