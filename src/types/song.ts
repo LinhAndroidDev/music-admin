@@ -35,10 +35,15 @@ export interface CreateSongInput {
 
 export type UpdateSongInput = CreateSongInput
 
+export type SongSortField = 'createdAt' | 'views' | 'duration'
+export type SortDirection = 'asc' | 'desc'
+
 export interface SongsQueryParams {
   pageSize: number
   cursorId?: string | null
   search?: string
+  sortBy?: SongSortField
+  sortDirection?: SortDirection
 }
 
 export interface SongsPageResult {

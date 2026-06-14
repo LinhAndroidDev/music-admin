@@ -20,10 +20,15 @@ import type {
   Song,
   SongsPageResult,
   SongsQueryParams,
+  SortDirection,
+  SongSortField,
   UpdateSongInput,
 } from '../types/song'
 
 const COLLECTION = 'songs'
+
+const DEFAULT_SORT: SongSortField = 'createdAt'
+const DEFAULT_DIRECTION: SortDirection = 'desc'
 
 function mapSong(id: string, data: Record<string, unknown>): Song {
   const singerId = (data.singerId as string) ?? ''
@@ -55,10 +60,18 @@ async function getCursorDoc(cursorId: string) {
   return snap.exists() ? snap : null
 }
 
-export async function fetchSongsPage(
-  params: SongsQueryParams,
-): Promise<SongsPageResult> {
-  const { pageSize, cursorId, search } = params
+function toFirestoreDirection(direction: SortDirection): 'asc' | 'desc' {
+  return direction === 'asc' ? 'asc' : 'desc'
+}
+
+export async function fetchSongsPage(params: SongsQueryParams): Promise<SongsPageResult> {
+  const {
+    pageSize,
+    cursorId,
+    search,
+    sortBy = DEFAULT_SORT,
+    sortDirection = DEFAULT_DIRECTION,
+  } = params
   const constraints: QueryConstraint[] = []
 
   if (search?.trim()) {
@@ -67,7 +80,7 @@ export async function fetchSongsPage(
     constraints.push(where('title', '<=', term + '\uf8ff'))
     constraints.push(orderBy('title'))
   } else {
-    constraints.push(orderBy('createdAt', 'desc'))
+    constraints.push(orderBy(sortBy, toFirestoreDirection(sortDirection)))
   }
 
   if (cursorId) {
@@ -90,43 +103,6 @@ export async function fetchSongsPage(
     lastDocId: pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null,
     hasMore,
   }
-}
-
-export async function fetchSongsPageNoSearch(
-  params: Omit<SongsQueryParams, 'search'>,
-): Promise<SongsPageResult> {
-  const { pageSize, cursorId } = params
-  const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')]
-
-  if (cursorId) {
-    const cursor = await getCursorDoc(cursorId)
-    if (cursor) {
-      constraints.push(startAfter(cursor))
-    }
-  }
-
-  constraints.push(limit(pageSize + 1))
-
-  const q = query(collection(db, COLLECTION), ...constraints)
-  const snapshot = await getDocs(q)
-  const docs = snapshot.docs
-  const hasMore = docs.length > pageSize
-  const pageDocs = hasMore ? docs.slice(0, pageSize) : docs
-
-  return {
-    songs: pageDocs.map((d) => mapSong(d.id, d.data())),
-    lastDocId: pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null,
-    hasMore,
-  }
-}
-
-export async function fetchSongsPageUnified(
-  params: SongsQueryParams,
-): Promise<SongsPageResult> {
-  if (params.search?.trim()) {
-    return fetchSongsPage(params)
-  }
-  return fetchSongsPageNoSearch(params)
 }
 
 export async function createSong(input: CreateSongInput): Promise<string> {

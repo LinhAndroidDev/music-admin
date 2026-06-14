@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createSong,
   deleteSong,
-  fetchSongsPageUnified,
+  fetchSongsPage,
   updateSong,
 } from '../services/songs.service'
 import type { CreateSongInput, SongsQueryParams, UpdateSongInput } from '../types/song'
@@ -12,7 +12,7 @@ export const SONGS_KEY = ['songs'] as const
 export function useSongsList(params: SongsQueryParams) {
   return useQuery({
     queryKey: [...SONGS_KEY, params],
-    queryFn: () => fetchSongsPageUnified(params),
+    queryFn: () => fetchSongsPage(params),
   })
 }
 

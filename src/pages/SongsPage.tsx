@@ -1,7 +1,20 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Alert, Avatar, Button, IconButton, Snackbar, Tooltip } from '@mui/material'
+import {
+  Alert,
+  Avatar,
+  Button,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Snackbar,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { useState } from 'react'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { DataTable, type DataTableColumn } from '../components/common/DataTable'
@@ -10,21 +23,37 @@ import { SongForm } from '../components/forms/SongForm'
 import { useCategories } from '../hooks/useCategories'
 import { useSingers } from '../hooks/useSingers'
 import { useCreateSong, useDeleteSong, useSongsList, useUpdateSong } from '../hooks/useSongs'
-import type { Song } from '../types/song'
+import type { Song, SongSortField, SortDirection } from '../types/song'
 import { formatDate, formatDuration, formatNumber } from '../utils/format'
 import type { SongFormValues } from '../utils/validation'
+
+const SORT_FIELD_LABELS: Record<SongSortField, string> = {
+  createdAt: 'Ngày tạo',
+  views: 'Lượt xem',
+  duration: 'Thời lượng',
+}
+
+const SORT_DIRECTION_LABELS: Record<SongSortField, { asc: string; desc: string }> = {
+  createdAt: { desc: 'Mới nhất trước', asc: 'Cũ nhất trước' },
+  views: { desc: 'Nhiều lượt xem nhất', asc: 'Ít lượt xem nhất' },
+  duration: { desc: 'Dài nhất', asc: 'Ngắn nhất' },
+}
 
 export function SongsPage() {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<SongSortField>('createdAt')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [cursors, setCursors] = useState<(string | null)[]>([null])
 
   const params = {
     pageSize: rowsPerPage,
     cursorId: cursors[page] ?? null,
     search: searchQuery || undefined,
+    sortBy,
+    sortDirection,
   }
 
   const { data, isLoading, error, refetch } = useSongsList(params)
@@ -49,6 +78,18 @@ export function SongsPage() {
     setSearchQuery(searchInput)
     resetPagination()
   }
+
+  const handleSortByChange = (field: SongSortField) => {
+    setSortBy(field)
+    resetPagination()
+  }
+
+  const handleSortDirectionChange = (direction: SortDirection) => {
+    setSortDirection(direction)
+    resetPagination()
+  }
+
+  const isSearchActive = Boolean(searchQuery.trim())
 
   const columns: DataTableColumn<Song>[] = [
     {
@@ -179,17 +220,51 @@ export function SongsPage() {
           resetPagination()
         }}
         toolbarExtra={
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setEditing(null)
-              setFormError(null)
-              setDialogOpen(true)
-            }}
-          >
-            Thêm bài hát
-          </Button>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+            <FormControl size="small" sx={{ minWidth: 140 }} disabled={isSearchActive}>
+              <InputLabel id="song-sort-field-label">Sắp xếp theo</InputLabel>
+              <Select
+                labelId="song-sort-field-label"
+                label="Sắp xếp theo"
+                value={sortBy}
+                onChange={(e) => handleSortByChange(e.target.value as SongSortField)}
+              >
+                {(Object.keys(SORT_FIELD_LABELS) as SongSortField[]).map((field) => (
+                  <MenuItem key={field} value={field}>
+                    {SORT_FIELD_LABELS[field]}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 180 }} disabled={isSearchActive}>
+              <InputLabel id="song-sort-direction-label">Thứ tự</InputLabel>
+              <Select
+                labelId="song-sort-direction-label"
+                label="Thứ tự"
+                value={sortDirection}
+                onChange={(e) => handleSortDirectionChange(e.target.value as SortDirection)}
+              >
+                <MenuItem value="desc">{SORT_DIRECTION_LABELS[sortBy].desc}</MenuItem>
+                <MenuItem value="asc">{SORT_DIRECTION_LABELS[sortBy].asc}</MenuItem>
+              </Select>
+            </FormControl>
+            {isSearchActive && (
+              <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
+                Khi tìm kiếm, kết quả sắp xếp theo tên
+              </Typography>
+            )}
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setEditing(null)
+                setFormError(null)
+                setDialogOpen(true)
+              }}
+            >
+              Thêm bài hát
+            </Button>
+          </Stack>
         }
         renderActions={(row) => (
           <>
