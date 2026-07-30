@@ -22,11 +22,19 @@ export function SingersPage() {
   const updateMutation = useUpdateSinger()
   const deleteMutation = useDeleteSinger()
 
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Singer | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Singer | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [snackbar, setSnackbar] = useState<string | null>(null)
+
+  const filteredSingers = (() => {
+    const term = searchQuery.trim().toLowerCase()
+    if (!term) return singers
+    return singers.filter((s) => s.name.toLowerCase().includes(term))
+  })()
 
   const columns: DataTableColumn<Singer>[] = [
     {
@@ -83,11 +91,20 @@ export function SingersPage() {
     <>
       <DataTable
         columns={columns}
-        rows={singers}
+        rows={filteredSingers}
         rowKey={(row) => row.id}
         loading={isLoading}
         error={error}
         onRetry={() => refetch()}
+        searchValue={searchInput}
+        searchPlaceholder="Tìm theo tên ca sĩ..."
+        onSearchChange={setSearchInput}
+        onSearchSubmit={() => setSearchQuery(searchInput)}
+        emptyMessage={
+          searchQuery.trim()
+            ? 'Không tìm thấy ca sĩ phù hợp'
+            : 'Không có dữ liệu'
+        }
         hidePagination
         page={0}
         rowsPerPage={10}
