@@ -12,7 +12,7 @@ export const singerSchema = z.object({
 
 export const songSchema = z.object({
   title: z.string().min(1, 'Tên bài hát là bắt buộc').max(200),
-  singerIds: z.array(z.string()).min(1, 'Vui lòng chọn ít nhất một ca sĩ'),
+  singerIds: z.array(z.string()),
   categoryId: z.string().min(1, 'Vui lòng chọn thể loại'),
   thumbnailUrl: z.string().url('Vui lòng upload ảnh bìa'),
   audioUrl: z.string().url('Vui lòng upload file mp3'),

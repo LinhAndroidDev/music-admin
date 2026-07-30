@@ -1,13 +1,15 @@
+import CloseIcon from '@mui/icons-material/Close'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Alert,
+  Autocomplete,
+  Avatar,
   Box,
   Chip,
   FormControl,
-  FormHelperText,
+  IconButton,
   InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
   Stack,
   TextField,
@@ -84,34 +86,84 @@ export function SongForm({ song, errorMessage, onSubmit }: SongFormProps) {
         <Controller
           name="singerIds"
           control={control}
-          render={({ field }) => (
-            <FormControl fullWidth error={!!errors.singerIds}>
-              <InputLabel>Ca sĩ</InputLabel>
-              <Select
-                {...field}
+          render={({ field }) => {
+            const selectedSingers = singers.filter((s) => (field.value ?? []).includes(s.id))
+
+            return (
+              <Autocomplete
                 multiple
-                value={field.value ?? []}
-                input={<OutlinedInput label="Ca sĩ" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {(selected as string[]).map((id) => {
-                      const singer = singers.find((s) => s.id === id)
-                      return <Chip key={id} size="small" label={singer?.name ?? id} />
-                    })}
-                  </Box>
+                disableCloseOnSelect
+                options={singers}
+                value={selectedSingers}
+                onChange={(_, newValue) => {
+                  field.onChange(newValue.map((s) => s.id))
+                }}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                noOptionsText="Không tìm thấy ca sĩ"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Ca sĩ"
+                    placeholder={selectedSingers.length === 0 ? 'Tìm tên ca sĩ...' : ''}
+                    error={!!errors.singerIds}
+                    helperText={errors.singerIds?.message ?? 'Không bắt buộc'}
+                  />
                 )}
-              >
-                {singers.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.singerIds && (
-                <FormHelperText>{errors.singerIds.message}</FormHelperText>
-              )}
-            </FormControl>
-          )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index })
+                    return (
+                      <Chip
+                        key={key}
+                        {...tagProps}
+                        size="small"
+                        avatar={
+                          <Avatar src={option.avatarUrl} alt={option.name} sx={{ width: 24, height: 24 }} />
+                        }
+                        label={option.name}
+                      />
+                    )
+                  })
+                }
+                renderOption={(props, option, { selected }) => {
+                  const { key, ...rest } = props
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...rest}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}
+                    >
+                      <Avatar
+                        src={option.avatarUrl}
+                        alt={option.name}
+                        sx={{ width: 32, height: 32 }}
+                      />
+                      <Box component="span" sx={{ flex: 1 }}>
+                        {option.name}
+                      </Box>
+                      {selected && (
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label={`Xóa ${option.name}`}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            field.onChange((field.value ?? []).filter((id) => id !== option.id))
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <CloseIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+                  )
+                }}
+              />
+            )
+          }}
         />
 
         <Controller
