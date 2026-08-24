@@ -3,6 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { Alert, Avatar, Button, IconButton, Snackbar, Tooltip } from '@mui/material'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { DataTable, type DataTableColumn } from '../components/common/DataTable'
 import { FormDialog } from '../components/common/FormDialog'
@@ -17,6 +18,7 @@ import type { Singer } from '../types/singer'
 import type { SingerFormValues } from '../utils/validation'
 
 export function SingersPage() {
+  const navigate = useNavigate()
   const { data: singers = [], isLoading, error, refetch } = useSingers()
   const createMutation = useCreateSinger()
   const updateMutation = useUpdateSinger()
@@ -111,23 +113,31 @@ export function SingersPage() {
         hasMore={false}
         onPageChange={() => {}}
         onRowsPerPageChange={() => {}}
+        onRowClick={(row) => navigate(`/singers/${row.id}`)}
         toolbarExtra={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => {
-            setEditing(null)
-            setFormError(null)
-            setDialogOpen(true)
-          }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditing(null)
+              setFormError(null)
+              setDialogOpen(true)
+            }}
+          >
             Thêm ca sĩ
           </Button>
         }
         renderActions={(row) => (
           <>
             <Tooltip title="Sửa">
-              <IconButton size="small" onClick={() => {
-                setEditing(row)
-                setFormError(null)
-                setDialogOpen(true)
-              }}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setEditing(row)
+                  setFormError(null)
+                  setDialogOpen(true)
+                }}
+              >
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>

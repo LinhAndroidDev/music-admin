@@ -48,6 +48,7 @@ interface DataTableProps<T> {
   onRetry?: () => void
   emptyMessage?: string
   renderActions?: (row: T) => ReactNode
+  onRowClick?: (row: T) => void
 }
 
 export function DataTable<T>({
@@ -71,6 +72,7 @@ export function DataTable<T>({
   onRetry,
   emptyMessage = 'Không có dữ liệu',
   renderActions,
+  onRowClick,
 }: DataTableProps<T>) {
   const actionColumn = renderActions ? 1 : 0
   const colSpan = columns.length + actionColumn
@@ -145,7 +147,12 @@ export function DataTable<T>({
                 </TableRow>
               ) : (
                 rows.map((row) => (
-                  <TableRow hover key={rowKey(row)}>
+                  <TableRow
+                    hover
+                    key={rowKey(row)}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    sx={onRowClick ? { cursor: 'pointer' } : undefined}
+                  >
                     {columns.map((col) => (
                       <TableCell key={col.id} align={col.align}>
                         {col.render
@@ -154,7 +161,10 @@ export function DataTable<T>({
                       </TableCell>
                     ))}
                     {renderActions && (
-                      <TableCell align="right">
+                      <TableCell
+                        align="right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Box
                           sx={{
                             display: 'flex',

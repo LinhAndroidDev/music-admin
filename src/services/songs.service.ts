@@ -131,3 +131,26 @@ export async function fetchTopSongs(limitCount = 10): Promise<Song[]> {
   const snapshot = await getDocs(q)
   return snapshot.docs.map((d) => mapSong(d.id, d.data()))
 }
+
+/** Bài hát của một ca sĩ (singerIds array-contains + singerId legacy). */
+export async function fetchSongsBySinger(singerId: string): Promise<Song[]> {
+  const [arraySnap, legacySnap] = await Promise.all([
+    getDocs(
+      query(collection(db, COLLECTION), where('singerIds', 'array-contains', singerId)),
+    ),
+    getDocs(query(collection(db, COLLECTION), where('singerId', '==', singerId))),
+  ])
+
+  const byId = new Map<string, Song>()
+  for (const d of [...arraySnap.docs, ...legacySnap.docs]) {
+    if (!byId.has(d.id)) {
+      byId.set(d.id, mapSong(d.id, d.data()))
+    }
+  }
+
+  return Array.from(byId.values()).sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() ?? 0
+    const bTime = b.createdAt?.toMillis?.() ?? 0
+    return bTime - aTime
+  })
+}

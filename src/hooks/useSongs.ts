@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createSong,
   deleteSong,
+  fetchSongsBySinger,
   fetchSongsPage,
   updateSong,
 } from '../services/songs.service'
@@ -13,6 +14,14 @@ export function useSongsList(params: SongsQueryParams) {
   return useQuery({
     queryKey: [...SONGS_KEY, params],
     queryFn: () => fetchSongsPage(params),
+  })
+}
+
+export function useSongsBySinger(singerId: string | undefined) {
+  return useQuery({
+    queryKey: [...SONGS_KEY, 'by-singer', singerId],
+    queryFn: () => fetchSongsBySinger(singerId!),
+    enabled: Boolean(singerId),
   })
 }
 

@@ -9,6 +9,14 @@ const pageTitles: Record<string, string> = {
   '/songs': 'Quản lý bài hát',
   '/singers': 'Quản lý ca sĩ',
   '/categories': 'Quản lý thể loại',
+  '/advertisements': 'Quản lý banner',
+}
+
+function resolveTitle(pathname: string): string {
+  if (pathname.startsWith('/singers/') && pathname !== '/singers') {
+    return 'Chi tiết ca sĩ'
+  }
+  return pageTitles[pathname] ?? 'Music Admin'
 }
 
 export function AppLayout() {
@@ -16,7 +24,7 @@ export function AppLayout() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
-  const title = pageTitles[location.pathname] ?? 'Music Admin'
+  const title = resolveTitle(location.pathname)
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>

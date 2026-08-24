@@ -3,6 +3,7 @@ import {
   createSinger,
   deleteSinger,
   fetchSingers,
+  getSingerById,
   updateSinger,
 } from '../services/singers.service'
 import type { CreateSingerInput, UpdateSingerInput } from '../types/singer'
@@ -13,6 +14,14 @@ export function useSingers() {
   return useQuery({
     queryKey: SINGERS_KEY,
     queryFn: fetchSingers,
+  })
+}
+
+export function useSinger(id: string | undefined) {
+  return useQuery({
+    queryKey: [...SINGERS_KEY, id],
+    queryFn: () => getSingerById(id!),
+    enabled: Boolean(id),
   })
 }
 
