@@ -64,14 +64,79 @@ function toFirestoreDirection(direction: SortDirection): 'asc' | 'desc' {
   return direction === 'asc' ? 'asc' : 'desc'
 }
 
+function sortSongsClient(
+  songs: Song[],
+  sortBy: SongSortField,
+  sortDirection: SortDirection,
+): Song[] {
+  const dir = sortDirection === 'asc' ? 1 : -1
+  return [...songs].sort((a, b) => {
+    if (sortBy === 'createdAt') {
+      const aTime = a.createdAt?.toMillis?.() ?? 0
+      const bTime = b.createdAt?.toMillis?.() ?? 0
+      return (aTime - bTime) * dir
+    }
+    if (sortBy === 'views') {
+      return (a.views - b.views) * dir
+    }
+    return (a.duration - b.duration) * dir
+  })
+}
+
+/**
+ * Lọc theo category chỉ dùng equality (không cần composite index).
+ * Sort / search / phân trang xử lý phía client.
+ */
+async function fetchSongsByCategoryPage(
+  params: SongsQueryParams,
+): Promise<SongsPageResult> {
+  const {
+    pageSize,
+    categoryId,
+    search,
+    page = 0,
+    sortBy = DEFAULT_SORT,
+    sortDirection = DEFAULT_DIRECTION,
+  } = params
+
+  const snapshot = await getDocs(
+    query(collection(db, COLLECTION), where('categoryId', '==', categoryId)),
+  )
+
+  let songs = snapshot.docs.map((d) => mapSong(d.id, d.data()))
+
+  const term = search?.trim().toLowerCase()
+  if (term) {
+    songs = songs.filter((s) => s.title.toLowerCase().includes(term))
+  }
+
+  songs = sortSongsClient(songs, sortBy, sortDirection)
+
+  const start = page * pageSize
+  const pageSongs = songs.slice(start, start + pageSize)
+
+  return {
+    songs: pageSongs,
+    lastDocId: null,
+    hasMore: start + pageSize < songs.length,
+  }
+}
+
 export async function fetchSongsPage(params: SongsQueryParams): Promise<SongsPageResult> {
   const {
     pageSize,
     cursorId,
     search,
+    categoryId,
     sortBy = DEFAULT_SORT,
     sortDirection = DEFAULT_DIRECTION,
   } = params
+
+  // Lọc category: equality-only trên Firestore → tránh composite index
+  if (categoryId) {
+    return fetchSongsByCategoryPage(params)
+  }
+
   const constraints: QueryConstraint[] = []
 
   if (search?.trim()) {

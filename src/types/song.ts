@@ -41,7 +41,10 @@ export type SortDirection = 'asc' | 'desc'
 export interface SongsQueryParams {
   pageSize: number
   cursorId?: string | null
+  /** Dùng phân trang offset khi lọc theo category (client-side) */
+  page?: number
   search?: string
+  categoryId?: string
   sortBy?: SongSortField
   sortDirection?: SortDirection
 }

@@ -46,12 +46,15 @@ export function SongsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SongSortField>('createdAt')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [categoryId, setCategoryId] = useState('')
   const [cursors, setCursors] = useState<(string | null)[]>([null])
 
   const params = {
     pageSize: rowsPerPage,
-    cursorId: cursors[page] ?? null,
+    cursorId: categoryId ? null : (cursors[page] ?? null),
+    page: categoryId ? page : undefined,
     search: searchQuery || undefined,
+    categoryId: categoryId || undefined,
     sortBy,
     sortDirection,
   }
@@ -89,7 +92,14 @@ export function SongsPage() {
     resetPagination()
   }
 
+  const handleCategoryChange = (id: string) => {
+    setCategoryId(id)
+    resetPagination()
+  }
+
   const isSearchActive = Boolean(searchQuery.trim())
+  /** Khi lọc category, sort/search chạy client nên vẫn cho đổi sắp xếp */
+  const sortDisabled = isSearchActive && !categoryId
 
   const columns: DataTableColumn<Song>[] = [
     {
@@ -199,10 +209,19 @@ export function SongsPage() {
         searchPlaceholder="Tìm theo tên bài hát..."
         onSearchChange={setSearchInput}
         onSearchSubmit={handleSearchSubmit}
+        emptyMessage={
+          categoryId || searchQuery.trim()
+            ? 'Không tìm thấy bài hát phù hợp'
+            : 'Không có dữ liệu'
+        }
         page={page}
         rowsPerPage={rowsPerPage}
         hasMore={data?.hasMore ?? false}
         onPageChange={(newPage) => {
+          if (categoryId) {
+            setPage(newPage)
+            return
+          }
           if (newPage > page) {
             if (!data?.hasMore) return
             if (data.lastDocId) {
@@ -221,7 +240,23 @@ export function SongsPage() {
         }}
         toolbarExtra={
           <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-            <FormControl size="small" sx={{ minWidth: 140 }} disabled={isSearchActive}>
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel id="song-category-filter-label">Thể loại</InputLabel>
+              <Select
+                labelId="song-category-filter-label"
+                label="Thể loại"
+                value={categoryId}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+              >
+                <MenuItem value="">Tất cả thể loại</MenuItem>
+                {categories.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 140 }} disabled={sortDisabled}>
               <InputLabel id="song-sort-field-label">Sắp xếp theo</InputLabel>
               <Select
                 labelId="song-sort-field-label"
@@ -236,7 +271,7 @@ export function SongsPage() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 180 }} disabled={isSearchActive}>
+            <FormControl size="small" sx={{ minWidth: 180 }} disabled={sortDisabled}>
               <InputLabel id="song-sort-direction-label">Thứ tự</InputLabel>
               <Select
                 labelId="song-sort-direction-label"
@@ -248,7 +283,7 @@ export function SongsPage() {
                 <MenuItem value="asc">{SORT_DIRECTION_LABELS[sortBy].asc}</MenuItem>
               </Select>
             </FormControl>
-            {isSearchActive && (
+            {sortDisabled && (
               <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
                 Khi tìm kiếm, kết quả sắp xếp theo tên
               </Typography>
