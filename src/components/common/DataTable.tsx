@@ -15,7 +15,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import type { ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { ErrorState } from './ErrorState'
 import { LoadingState } from './LoadingState'
 
@@ -49,6 +49,7 @@ interface DataTableProps<T> {
   emptyMessage?: string
   renderActions?: (row: T) => ReactNode
   onRowClick?: (row: T) => void
+  groupBy?: (row: T) => string
 }
 
 export function DataTable<T>({
@@ -73,6 +74,7 @@ export function DataTable<T>({
   emptyMessage = 'Không có dữ liệu',
   renderActions,
   onRowClick,
+  groupBy,
 }: DataTableProps<T>) {
   const actionColumn = renderActions ? 1 : 0
   const colSpan = columns.length + actionColumn
@@ -146,38 +148,61 @@ export function DataTable<T>({
                   </TableCell>
                 </TableRow>
               ) : (
-                rows.map((row) => (
-                  <TableRow
-                    hover
-                    key={rowKey(row)}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    sx={onRowClick ? { cursor: 'pointer' } : undefined}
-                  >
-                    {columns.map((col) => (
-                      <TableCell key={col.id} align={col.align}>
-                        {col.render
-                          ? col.render(row)
-                          : String((row as Record<string, unknown>)[col.id] ?? '')}
-                      </TableCell>
-                    ))}
-                    {renderActions && (
-                      <TableCell
-                        align="right"
-                        onClick={(e) => e.stopPropagation()}
+                rows.map((row, index) => {
+                  const group = groupBy?.(row)
+                  const previousGroup = index > 0 ? groupBy?.(rows[index - 1]) : undefined
+                  const showGroup = Boolean(group && group !== previousGroup)
+
+                  return (
+                    <Fragment key={rowKey(row)}>
+                      {showGroup && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={colSpan}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              color: 'primary.main',
+                              fontWeight: 700,
+                              fontSize: '1rem',
+                              py: 1,
+                            }}
+                          >
+                            {group}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      <TableRow
+                        hover
+                        onClick={onRowClick ? () => onRowClick(row) : undefined}
+                        sx={onRowClick ? { cursor: 'pointer' } : undefined}
                       >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            gap: 0.5,
-                          }}
-                        >
-                          {renderActions(row)}
-                        </Box>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))
+                        {columns.map((col) => (
+                          <TableCell key={col.id} align={col.align}>
+                            {col.render
+                              ? col.render(row)
+                              : String((row as Record<string, unknown>)[col.id] ?? '')}
+                          </TableCell>
+                        ))}
+                        {renderActions && (
+                          <TableCell
+                            align="right"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                gap: 0.5,
+                              }}
+                            >
+                              {renderActions(row)}
+                            </Box>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    </Fragment>
+                  )
+                })
               )}
             </TableBody>
           </Table>

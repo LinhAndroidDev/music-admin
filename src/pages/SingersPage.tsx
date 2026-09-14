@@ -1,8 +1,20 @@
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import { Alert, Avatar, Button, IconButton, Snackbar, Tooltip } from '@mui/material'
-import { useState } from 'react'
+import {
+  Alert,
+  Avatar,
+  Button,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Snackbar,
+  Stack,
+  Tooltip,
+} from '@mui/material'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { DataTable, type DataTableColumn } from '../components/common/DataTable'
@@ -17,6 +29,26 @@ import {
 import type { Singer } from '../types/singer'
 import type { SingerFormValues } from '../utils/validation'
 
+type SingerSortDirection = 'asc' | 'desc'
+
+const singerCollator = new Intl.Collator('vi', {
+  sensitivity: 'base',
+  numeric: true,
+})
+
+function getSingerInitial(name: string): string {
+  const firstCharacter = name.trim().charAt(0)
+  if (!firstCharacter) return '#'
+
+  const normalized = firstCharacter
+    .replace(/[đĐ]/g, 'D')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+  return /^[A-Z]$/.test(normalized) ? normalized : '#'
+}
+
 export function SingersPage() {
   const navigate = useNavigate()
   const { data: singers = [], isLoading, error, refetch } = useSingers()
@@ -26,17 +58,29 @@ export function SingersPage() {
 
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortDirection, setSortDirection] = useState<SingerSortDirection>('asc')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Singer | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Singer | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [snackbar, setSnackbar] = useState<string | null>(null)
 
-  const filteredSingers = (() => {
+  const filteredSingers = useMemo(() => {
     const term = searchQuery.trim().toLowerCase()
-    if (!term) return singers
-    return singers.filter((s) => s.name.toLowerCase().includes(term))
-  })()
+    const filtered = term
+      ? singers.filter((s) => s.name.toLowerCase().includes(term))
+      : singers
+
+    return [...filtered].sort((a, b) => {
+      const initialComparison = singerCollator.compare(
+        getSingerInitial(a.name),
+        getSingerInitial(b.name),
+      )
+      const nameComparison = singerCollator.compare(a.name, b.name)
+      const comparison = initialComparison || nameComparison
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+  }, [searchQuery, singers, sortDirection])
 
   const columns: DataTableColumn<Singer>[] = [
     {
@@ -114,18 +158,35 @@ export function SingersPage() {
         onPageChange={() => {}}
         onRowsPerPageChange={() => {}}
         onRowClick={(row) => navigate(`/singers/${row.id}`)}
+        groupBy={(row) => getSingerInitial(row.name)}
         toolbarExtra={
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setEditing(null)
-              setFormError(null)
-              setDialogOpen(true)
-            }}
-          >
-            Thêm ca sĩ
-          </Button>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 145 }}>
+              <InputLabel id="singer-sort-label">Sắp xếp tên</InputLabel>
+              <Select
+                labelId="singer-sort-label"
+                label="Sắp xếp tên"
+                value={sortDirection}
+                onChange={(event) =>
+                  setSortDirection(event.target.value as SingerSortDirection)
+                }
+              >
+                <MenuItem value="asc">A → Z</MenuItem>
+                <MenuItem value="desc">Z → A</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setEditing(null)
+                setFormError(null)
+                setDialogOpen(true)
+              }}
+            >
+              Thêm ca sĩ
+            </Button>
+          </Stack>
         }
         renderActions={(row) => (
           <>
