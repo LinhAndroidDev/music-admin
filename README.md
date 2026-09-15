@@ -10,6 +10,7 @@ Website quản trị dữ liệu nhạc cho ứng dụng Android nghe nhạc —
 - [Cài đặt](#cài-đặt)
 - [Cấu hình Firebase](#cấu-hình-firebase)
 - [Cấu hình Cloudinary](#cấu-hình-cloudinary)
+- [Deploy Firebase Hosting](#deploy-firebase-hosting)
 - [Scripts](#scripts)
 - [Cấu trúc thư mục](#cấu-trúc-thư-mục)
 - [Mô hình dữ liệu](#mô-hình-dữ-liệu)
@@ -100,6 +101,42 @@ firebase deploy --only firestore:rules
 
 > File MP3 được upload với `resourceType="video"` (chuẩn Cloudinary cho audio), lyric `.lrc` dùng `resourceType="raw"`, ảnh dùng `resourceType="image"`.
 
+## Deploy Firebase Hosting
+
+Dự án là SPA Vite — dùng **Firebase Hosting** (không dùng App Hosting). `firebase.json` đã cấu hình rewrite mọi route về `index.html` để React Router hoạt động khi refresh `/songs`, `/singers/:id`, ...
+
+1. Bật Hosting trên [Firebase Console](https://console.firebase.google.com/project/music-c223e/hosting) nếu chưa có.
+2. Cài CLI và đăng nhập:
+
+```bash
+npm install -g firebase-tools
+firebase login
+```
+
+3. Gắn project (đã có `.firebaserc` mặc định `music-c223e`):
+
+```bash
+firebase use music-c223e
+```
+
+4. Đảm bảo file `.env` đã điền đủ biến `VITE_*` — Vite **nhúng env vào JS lúc build**, không đọc trên server Hosting.
+5. Build và deploy:
+
+```bash
+npm run deploy
+```
+
+Hoặc tách bước:
+
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+Sau khi xong, URL mặc định là `https://music-c223e.web.app` và `https://music-c223e.firebaseapp.com`.
+
+> Biến `VITE_*` nằm trong bundle client. `firestore.rules` hiện đang mở (`read, write: if true`) — siết rules trước khi public URL.
+
 ## Scripts
 
 | Lệnh | Mô tả |
@@ -108,6 +145,7 @@ firebase deploy --only firestore:rules
 | `npm run build` | Type-check (`tsc -b`) + build production |
 | `npm run preview` | Preview bản build production |
 | `npm run lint` | Chạy ESLint |
+| `npm run deploy` | Build production rồi deploy lên Firebase Hosting |
 
 ## Cấu trúc thư mục
 
