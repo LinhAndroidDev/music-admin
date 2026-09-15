@@ -174,7 +174,7 @@ export function CloudinaryUpload({
       )}
 
       {mode === 'url' && (
-        <Stack direction="row" spacing={1} alignItems="flex-start">
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
           <TextField
             fullWidth
             size="small"

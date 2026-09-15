@@ -51,7 +51,7 @@ export function SingerDetailPage() {
 
   if (!singer) {
     return (
-      <Stack spacing={2} alignItems="flex-start">
+      <Stack spacing={2} sx={{ alignItems: 'flex-start' }}>
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/singers')}>
           Quay lại
         </Button>
@@ -77,7 +77,7 @@ export function SingerDetailPage() {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={3}
-          alignItems={{ xs: 'center', sm: 'flex-start' }}
+          sx={{ alignItems: { xs: 'center', sm: 'flex-start' } }}
         >
           <Avatar
             src={singer.avatarUrl}

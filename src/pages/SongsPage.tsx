@@ -239,7 +239,11 @@ export function SongsPage() {
           resetPagination()
         }}
         toolbarExtra={
-          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+          >
             <FormControl size="small" sx={{ minWidth: 160 }}>
               <InputLabel id="song-category-filter-label">Thể loại</InputLabel>
               <Select

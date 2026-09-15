@@ -110,13 +110,13 @@ export function SongForm({ song, errorMessage, onSubmit }: SongFormProps) {
                     helperText={errors.singerIds?.message ?? 'Không bắt buộc'}
                   />
                 )}
-                renderTags={(value, getTagProps) =>
+                renderValue={(value, getItemProps) =>
                   value.map((option, index) => {
-                    const { key, ...tagProps } = getTagProps({ index })
+                    const { key, ...itemProps } = getItemProps({ index })
                     return (
                       <Chip
                         key={key}
-                        {...tagProps}
+                        {...itemProps}
                         size="small"
                         avatar={
                           <Avatar src={option.avatarUrl} alt={option.name} sx={{ width: 24, height: 24 }} />
