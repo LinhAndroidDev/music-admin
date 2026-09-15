@@ -30,7 +30,13 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         >
           <MenuIcon />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" color="text.primary">
+        <Typography
+          variant="h6"
+          noWrap
+          component="div"
+          color="text.primary"
+          sx={{ minWidth: 0, flex: 1 }}
+        >
           {title}
         </Typography>
       </Toolbar>

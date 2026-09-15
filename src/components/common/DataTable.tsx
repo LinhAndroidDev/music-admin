@@ -14,6 +14,8 @@ import {
   TextField,
   Toolbar,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import { Fragment, type ReactNode } from 'react'
 import { ErrorState } from './ErrorState'
@@ -76,12 +78,32 @@ export function DataTable<T>({
   onRowClick,
   groupBy,
 }: DataTableProps<T>) {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const actionColumn = renderActions ? 1 : 0
   const colSpan = columns.length + actionColumn
 
   return (
-    <Paper elevation={0} sx={{ border: 1, borderColor: 'divider', borderRadius: 2 }}>
-      <Toolbar sx={{ gap: 2, flexWrap: 'wrap' }}>
+    <Paper
+      elevation={0}
+      sx={{
+        border: 1,
+        borderColor: 'divider',
+        borderRadius: 2,
+        maxWidth: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      <Toolbar
+        sx={{
+          gap: 2,
+          flexWrap: 'wrap',
+          px: { xs: 1.5, sm: 2 },
+          py: { xs: 1.5, sm: 1 },
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+        }}
+      >
         {title && (
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {title}
@@ -96,7 +118,7 @@ export function DataTable<T>({
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSearchSubmit?.()
             }}
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: 0, width: { xs: '100%', sm: 220 } }}
             slotProps={{
               input: {
                 endAdornment: (
@@ -118,7 +140,12 @@ export function DataTable<T>({
       ) : error ? (
         <ErrorState message={error.message} onRetry={onRetry} />
       ) : (
-        <TableContainer>
+        <TableContainer
+          sx={{
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -221,7 +248,15 @@ export function DataTable<T>({
             onPageChange(0)
           }}
           rowsPerPageOptions={[5, 10, 25]}
-          labelRowsPerPage="Số dòng:"
+          labelRowsPerPage={isMobile ? '' : 'Số dòng:'}
+          sx={{
+            overflowX: 'auto',
+            flexWrap: 'wrap',
+            '& .MuiTablePagination-toolbar': {
+              flexWrap: 'wrap',
+              px: { xs: 1, sm: 2 },
+            },
+          }}
           slotProps={{
             actions: {
               nextButton: { disabled: !hasMore },

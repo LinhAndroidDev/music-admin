@@ -4,6 +4,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import type { ReactNode } from 'react'
 
@@ -28,10 +30,21 @@ export function FormDialog({
   onClose,
   onSubmit,
 }: FormDialogProps) {
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={maxWidth}
+      fullWidth
+      fullScreen={fullScreen}
+    >
       <DialogTitle>{title}</DialogTitle>
-      <DialogContent dividers>{children}</DialogContent>
+      <DialogContent dividers sx={{ overflowY: 'auto' }}>
+        {children}
+      </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
           Hủy

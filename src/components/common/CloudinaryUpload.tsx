@@ -174,7 +174,11 @@ export function CloudinaryUpload({
       )}
 
       {mode === 'url' && (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1}
+          sx={{ alignItems: { xs: 'stretch', sm: 'flex-start' } }}
+        >
           <TextField
             fullWidth
             size="small"
@@ -192,7 +196,7 @@ export function CloudinaryUpload({
             variant="outlined"
             onClick={handleApplyUrl}
             disabled={uploading || !urlInput.trim()}
-            sx={{ whiteSpace: 'nowrap' }}
+            sx={{ whiteSpace: 'nowrap', width: { xs: '100%', sm: 'auto' } }}
           >
             {uploading ? <CircularProgress size={18} /> : 'Áp dụng'}
           </Button>

@@ -242,9 +242,13 @@ export function SongsPage() {
           <Stack
             direction="row"
             spacing={1}
-            sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+            sx={{
+              width: { xs: '100%', sm: 'auto' },
+              alignItems: { xs: 'stretch', sm: 'center' },
+              flexWrap: 'wrap',
+            }}
           >
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 160 } }}>
               <InputLabel id="song-category-filter-label">Thể loại</InputLabel>
               <Select
                 labelId="song-category-filter-label"
@@ -260,7 +264,11 @@ export function SongsPage() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 140 }} disabled={sortDisabled}>
+            <FormControl
+              size="small"
+              disabled={sortDisabled}
+              sx={{ minWidth: { xs: '100%', sm: 140 } }}
+            >
               <InputLabel id="song-sort-field-label">Sắp xếp theo</InputLabel>
               <Select
                 labelId="song-sort-field-label"
@@ -275,7 +283,11 @@ export function SongsPage() {
                 ))}
               </Select>
             </FormControl>
-            <FormControl size="small" sx={{ minWidth: 180 }} disabled={sortDisabled}>
+            <FormControl
+              size="small"
+              disabled={sortDisabled}
+              sx={{ minWidth: { xs: '100%', sm: 180 } }}
+            >
               <InputLabel id="song-sort-direction-label">Thứ tự</InputLabel>
               <Select
                 labelId="song-sort-direction-label"
@@ -295,6 +307,7 @@ export function SongsPage() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
               onClick={() => {
                 setEditing(null)
                 setFormError(null)

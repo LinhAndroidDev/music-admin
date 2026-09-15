@@ -72,7 +72,7 @@ export function SingerDetailPage() {
 
       <Paper
         elevation={0}
-        sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 3 }}
+        sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: { xs: 2, sm: 3 } }}
       >
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
@@ -112,8 +112,8 @@ export function SingerDetailPage() {
             Ca sĩ này chưa có bài hát nào
           </Typography>
         ) : (
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <Table sx={{ minWidth: 640 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Ảnh</TableCell>

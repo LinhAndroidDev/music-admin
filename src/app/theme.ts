@@ -25,5 +25,19 @@ export const theme = createTheme({
         },
       },
     },
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          minHeight: 56,
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          padding: '10px 12px',
+        },
+      },
+    },
   },
 })

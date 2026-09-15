@@ -160,8 +160,16 @@ export function SingersPage() {
         onRowClick={(row) => navigate(`/singers/${row.id}`)}
         groupBy={(row) => getSingerInitial(row.name)}
         toolbarExtra={
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <FormControl size="small" sx={{ minWidth: 145 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              width: { xs: '100%', sm: 'auto' },
+              alignItems: { xs: 'stretch', sm: 'center' },
+              flexWrap: 'wrap',
+            }}
+          >
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 145 } }}>
               <InputLabel id="singer-sort-label">Sắp xếp tên</InputLabel>
               <Select
                 labelId="singer-sort-label"
@@ -178,6 +186,7 @@ export function SingersPage() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
+              sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
               onClick={() => {
                 setEditing(null)
                 setFormError(null)

@@ -121,7 +121,12 @@ export function AdvertisementsPage() {
         onPageChange={() => {}}
         onRowsPerPageChange={() => {}}
         toolbarExtra={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreate}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            onClick={handleOpenCreate}
+          >
             Thêm banner
           </Button>
         }

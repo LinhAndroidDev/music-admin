@@ -90,7 +90,12 @@ export function CategoriesPage() {
         onPageChange={() => {}}
         onRowsPerPageChange={() => {}}
         toolbarExtra={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreate}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
+            onClick={handleOpenCreate}
+          >
             Thêm thể loại
           </Button>
         }

@@ -60,7 +60,7 @@ export function DashboardPage() {
                   <Typography variant="body2" color="text.secondary">
                     {card.label}
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
                     {formatNumber(data[card.key])}
                   </Typography>
                 </Box>
@@ -75,8 +75,8 @@ export function DashboardPage() {
           <TrendingUpIcon color="primary" />
           <Typography variant="h6">Top bài hát xem nhiều</Typography>
         </Box>
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <Table sx={{ minWidth: 560 }}>
             <TableHead>
               <TableRow>
                 <TableCell width={60}>#</TableCell>
