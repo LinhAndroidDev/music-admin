@@ -13,7 +13,6 @@ import {
   Snackbar,
   Stack,
   Tooltip,
-  Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
@@ -49,10 +48,13 @@ export function SongsPage() {
   const [categoryId, setCategoryId] = useState('')
   const [cursors, setCursors] = useState<(string | null)[]>([null])
 
+  const isSearchActive = Boolean(searchQuery.trim())
+  const useClientPaging = Boolean(categoryId || isSearchActive)
+
   const params = {
     pageSize: rowsPerPage,
-    cursorId: categoryId ? null : (cursors[page] ?? null),
-    page: categoryId ? page : undefined,
+    cursorId: useClientPaging ? null : (cursors[page] ?? null),
+    page: useClientPaging ? page : undefined,
     search: searchQuery || undefined,
     categoryId: categoryId || undefined,
     sortBy,
@@ -96,10 +98,6 @@ export function SongsPage() {
     setCategoryId(id)
     resetPagination()
   }
-
-  const isSearchActive = Boolean(searchQuery.trim())
-  /** Khi lọc category, sort/search chạy client nên vẫn cho đổi sắp xếp */
-  const sortDisabled = isSearchActive && !categoryId
 
   const columns: DataTableColumn<Song>[] = [
     {
@@ -218,7 +216,7 @@ export function SongsPage() {
         rowsPerPage={rowsPerPage}
         hasMore={data?.hasMore ?? false}
         onPageChange={(newPage) => {
-          if (categoryId) {
+          if (useClientPaging) {
             setPage(newPage)
             return
           }
@@ -266,7 +264,6 @@ export function SongsPage() {
             </FormControl>
             <FormControl
               size="small"
-              disabled={sortDisabled}
               sx={{ minWidth: { xs: '100%', sm: 140 } }}
             >
               <InputLabel id="song-sort-field-label">Sắp xếp theo</InputLabel>
@@ -285,7 +282,6 @@ export function SongsPage() {
             </FormControl>
             <FormControl
               size="small"
-              disabled={sortDisabled}
               sx={{ minWidth: { xs: '100%', sm: 180 } }}
             >
               <InputLabel id="song-sort-direction-label">Thứ tự</InputLabel>
@@ -299,11 +295,6 @@ export function SongsPage() {
                 <MenuItem value="asc">{SORT_DIRECTION_LABELS[sortBy].asc}</MenuItem>
               </Select>
             </FormControl>
-            {sortDisabled && (
-              <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
-                Khi tìm kiếm, kết quả sắp xếp theo tên
-              </Typography>
-            )}
             <Button
               variant="contained"
               startIcon={<AddIcon />}

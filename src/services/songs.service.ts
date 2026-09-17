@@ -84,10 +84,10 @@ function sortSongsClient(
 }
 
 /**
- * Lọc theo category chỉ dùng equality (không cần composite index).
- * Sort / search / phân trang xử lý phía client.
+ * Search / lọc category: query đơn giản trên Firestore, rồi lọc + sort + phân trang phía client.
+ * Tránh prefix query (phân biệt hoa/thường) và composite index.
  */
-async function fetchSongsByCategoryPage(
+async function fetchSongsClientPage(
   params: SongsQueryParams,
 ): Promise<SongsPageResult> {
   const {
@@ -99,9 +99,11 @@ async function fetchSongsByCategoryPage(
     sortDirection = DEFAULT_DIRECTION,
   } = params
 
-  const snapshot = await getDocs(
-    query(collection(db, COLLECTION), where('categoryId', '==', categoryId)),
-  )
+  const snapshot = categoryId
+    ? await getDocs(
+        query(collection(db, COLLECTION), where('categoryId', '==', categoryId)),
+      )
+    : await getDocs(collection(db, COLLECTION))
 
   let songs = snapshot.docs.map((d) => mapSong(d.id, d.data()))
 
@@ -132,21 +134,13 @@ export async function fetchSongsPage(params: SongsQueryParams): Promise<SongsPag
     sortDirection = DEFAULT_DIRECTION,
   } = params
 
-  // Lọc category: equality-only trên Firestore → tránh composite index
-  if (categoryId) {
-    return fetchSongsByCategoryPage(params)
+  if (categoryId || search?.trim()) {
+    return fetchSongsClientPage(params)
   }
 
-  const constraints: QueryConstraint[] = []
-
-  if (search?.trim()) {
-    const term = search.trim()
-    constraints.push(where('title', '>=', term))
-    constraints.push(where('title', '<=', term + '\uf8ff'))
-    constraints.push(orderBy('title'))
-  } else {
-    constraints.push(orderBy(sortBy, toFirestoreDirection(sortDirection)))
-  }
+  const constraints: QueryConstraint[] = [
+    orderBy(sortBy, toFirestoreDirection(sortDirection)),
+  ]
 
   if (cursorId) {
     const cursor = await getCursorDoc(cursorId)
